@@ -4,12 +4,20 @@ from game import Game, CustomerTile, BurgerTile, FriesTile, HeroTile, SPIKE, AIM
 
 
 class Bot:
+    def __init__(self):
+        self.history = []
+
     def move(self, state):
         try:
             print('\n')
             game = Game(state)
             start = (game.me.pos['x'], game.me.pos['y'])
             target = self.get_target(game)
+            if (self.history.count(target) > 2):
+                print('OMG STUCK')
+                target = random_position(game)
+
+            self.add_to_history(start, target)
             print('From', start, 'to', target, end=' ')
             return game.board.path_find_to(start=start,
                                            target=target,
@@ -168,6 +176,15 @@ class Bot:
             return abs(game.me.pos['x'] - position[0]) + abs(game.me.pos['y'] - position[1])
 
         return sorted(game.taverns_locs, key=distance_to_me)[0]
+
+    def add_to_history(self, start, target):
+        if (abs(start[0] - target[0]) + abs(start[1] - target[1]) <= 1):
+            self.history.append(target)
+        else:
+            self.history = self.history[1:]
+
+        if (len(self.history) > 5):
+            self.history = self.history[1:]
 
 
 def random_position(game):
