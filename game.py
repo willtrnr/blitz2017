@@ -22,6 +22,10 @@ class HeroTile:
     def __init__(self, id):
         self.id = id
 
+class CustomerTile:
+    def __init__(self, id):
+        self.id = id
+
 
 class FriesTile:
     def __init__(self, hero_id=None):
@@ -44,7 +48,8 @@ class Game:
         self.heroes_locs = {}
         self.taverns_locs = set()
         self.spikes_locs = set()
-        self.customers_locs = set()
+        self.customers_locs = {}
+        self.me = Hero(state['hero'])
         for row in range(len(self.board.tiles)):
             for col in range(len(self.board.tiles[row])):
                 obj = self.board.tiles[row][col]
@@ -58,8 +63,8 @@ class Game:
                     self.taverns_locs.add((row, col))
                 elif obj == SPIKE:
                     self.spikes_locs.add((row, col))
-                elif obj == CUSTOMER:
-                    self.customers_locs.add((row, col))
+                elif isinstance(obj, CustomerTile):
+                    self.customers_locs[(row, col)] = obj.id
 
 
 class Board:
@@ -83,7 +88,7 @@ class Board:
             return HeroTile(match.group(1))
         match = re.match(r'C([0-9])', tile_string)
         if match:
-            return CUSTOMER
+            return CustomerTile(match.group(1))
 
     def __parseTiles(self, tiles):
         vector = [tiles[i:i+2] for i in range(0, len(tiles), 2)]
