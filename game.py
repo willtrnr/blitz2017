@@ -133,7 +133,7 @@ class Board:
                                      'target': '(%d,%d)' % target})
             json = r.json()
             return json.get('direction', None)
-        except e:
+        except:
             print('Pathfinder as a Service failed')
             return None
 
