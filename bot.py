@@ -63,17 +63,26 @@ class Bot:
 
         def customer_difficulty(customer):
             customer_pos = customer_positions[customer.id]
-            distance = len(game.board.path_find((game.me.pos['x'], game.me.pos['y']), customer_pos)[1]) * config.STEP_COST_VS_RESOURCES
-            return customer.french_fries + customer.burger + distance
+
+            distance = len(game.board.path_find((game.me.pos['x'], game.me.pos['y']), customer_pos)[1])
+            base_score = customer.french_fries + customer.burger + distance * config.STEP_COST_VS_RESOURCES
+            multiplier = max(0, min(1, (distance - 3) / 10)) if self.sufficient_resources_for(game, customer) else 1
+
+            # print('base_score: ' + str(base_score))
+            if multiplier < 0.4:
+                print('Low multiplier: ' + str(multiplier))
+            # print('total_score: ' + str(base_score * multiplier))
+
+            return base_score * multiplier
 
         customers = sorted(game.customers, key=customer_difficulty)
+
+        print('Customer to find: ' + str(customers[0].id))
 
         return customers[0]
 
     def find_customer_position(self, game, customer_id):
         """The passed customer's position"""
-
-        print('Customer to find: ' + str(customer_id))
 
         tiles = game.board.tiles
 
