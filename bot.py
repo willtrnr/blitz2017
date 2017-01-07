@@ -45,11 +45,9 @@ class Bot:
     def assess_hazard(self, game, tile):
         """Get weight for passing through unsafe stuff"""
         # if isinstance(tile, HeroTile) and tile.id != game.me.id:
-        #     return 5 if game.me.life > 50 else 10
+        #     return int(game.board.size / 2) if game.me.life > 50 else game.board.size
         # elif tile == SPIKE:
-        #     return 5 if game.me.life > 50 else 10
-        # else:
-        #     return 1
+        #     return int(game.board.size / 2) if game.me.life > 50 else game.board.size
         return 1
 
     def easiest_customer(self, game):

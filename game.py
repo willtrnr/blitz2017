@@ -103,7 +103,7 @@ class Board:
         """True if can walk through."""
         x, y = loc
         pos = self.tiles[x][y]
-        return (pos != WALL) and (pos != TAVERN) and not isinstance(pos, CustomerTile) and not isinstance(pos, FriesTile) and not isinstance(pos, BurgerTile) and not isinstance(pos, HeroTile)
+        return (pos != WALL) and (pos != TAVERN) and not isinstance(pos, CustomerTile) and not isinstance(pos, FriesTile) and not isinstance(pos, BurgerTile)
 
     def hazard(self, loc):
         """True if is hazard."""
@@ -131,7 +131,7 @@ class Board:
     def path_find_to(self, start, target, hazard_cost=None):
         """Get next direction to target"""
         (s, path) = self.path_find(start, target, hazard_cost)
-        print('Path score is ', s)
+        print('Path length is {} and score is {}'.format(len(path), s))
         if path is None:
             return None
         if len(path) > 1:
@@ -147,10 +147,11 @@ class Board:
 
         def cost(loc):
             if hazard_cost is not None and self.hazard(loc):
+                heroes = [h for h in (self.to(loc, a) for a in AIM.keys()) if isinstance(h, HeroTile)]
                 if callable(hazard_cost):
-                    return hazard_cost(self.tiles[loc[0]][loc[1]])
+                    return hazard_cost(self.tiles[loc[0]][loc[1]]) + sum(hazard_cost(h) for h in heroes)
                 else:
-                    return int(hazard_cost)
+                    return int(hazard_cost) + int(hazard_cost) * len(heroes)
             else:
                 return 1
 
