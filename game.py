@@ -31,12 +31,12 @@ class CustomerTile:
 
 class FriesTile:
     def __init__(self, hero_id=None):
-        self.hero_id = int(hero_id == (-1 if hero_id == '-' else hero_id))
+        self.hero_id = int(-1 if hero_id == "-" else hero_id)
 
 
 class BurgerTile:
     def __init__(self, hero_id=None):
-        self.hero_id = int(hero_id == (-1 if hero_id == '-' else hero_id))
+        self.hero_id = int(-1 if hero_id == "-" else hero_id)
 
 
 class Game:
@@ -208,10 +208,10 @@ class Hero:
         self.name = hero['name']
         self.pos = hero['pos']
         self.id = int(hero['id'])
-        self.life = hero['life']
-        self.calories = hero['calories']
-        self.french_fries = hero['frenchFriesCount']
-        self.burger = hero['burgerCount']
+        self.life = int(hero['life'])
+        self.calories = int(hero['calories'])
+        self.french_fries = int(hero['frenchFriesCount'])
+        self.burger = int(hero['burgerCount'])
 
 
 class Customer:
