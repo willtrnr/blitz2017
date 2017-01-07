@@ -188,7 +188,7 @@ class Board:
                 if neighbor != target and (neighbor in closed_set or not self.passable(neighbor)):
                     continue
 
-                tentative_g_score = g_score[current] + max(cost(l) for l in {neighbor} | set(self.to(neighbor, a) for a in AIM.keys()))
+                tentative_g_score = g_score[current] + cost(neighbor)
                 if neighbor not in open_set:
                     open_set.add(neighbor)
                 elif tentative_g_score >= g_score[neighbor]:
