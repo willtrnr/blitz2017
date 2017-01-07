@@ -1,6 +1,6 @@
-from random import choice
-from game import Game, CustomerTile, BurgerTile, FriesTile, AIM
 import config
+from random import choice
+from game import Game, CustomerTile, BurgerTile, FriesTile, HeroTile, SPIKE, AIM
 
 
 class Bot:
@@ -11,10 +11,12 @@ class Bot:
         start = (game.me.pos['x'], game.me.pos['y'])
         print(start, target, end=' ')
         print('\n')
-        return game.board.path_find_to(start, target) or 'Stay'
+        return game.board.path_find_to(start=start,
+                                       target=target,
+                                       hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
 
     def get_target(self, game):
-        "Returns the position we want to head towards"
+        """Returns the position we want to head towards"""
         customer = self.easiest_customer(game)
 
         unowned_nearby_resource_position = self.unowned_nearby_resource_position(game)
@@ -35,8 +37,18 @@ class Bot:
             print('getting resources for customer ' + str(customer.id))
             return self.get_nearest_needed_resource_position(game, customer)
 
+    def assess_hazard(self, game, tile):
+        """Get weight for passing through unsafe stuff"""
+        if isinstance(tile, HeroTile) and tile.id != game.me.id:
+            return 2
+        elif tile == SPIKE:
+            return 1 if game.me.life > 50 else 5
+        else:
+            return 1
+
+
     def easiest_customer(self, game):
-        "Returns the customer that requires the less resources"
+        """Returns the customer that requires the less resources"""
 
         def customer_difficulty(customer):
             return customer.french_fries + customer.burger
@@ -46,7 +58,7 @@ class Bot:
         return customers[0]
 
     def find_customer_position(self, game, customer_id):
-        "The passed customer's position"
+        """The passed customer's position"""
 
         print('Customer to find: ' + str(customer_id))
 
@@ -61,13 +73,13 @@ class Bot:
                         return (x, y)
 
     def sufficient_resources_for(self, game, customer):
-        "Do we have sufficient resources for the passed customer?"
+        """Do we have sufficient resources for the passed customer?"""
 
         return (game.me.french_fries >= customer.french_fries
                 and game.me.burger >= customer.burger)
 
     def get_nearest_needed_resource_position(self, game, customer):
-        "The position of the closest resource necessary for the customer"
+        """The position of the closest resource necessary for the customer"""
 
         def distance_to_me(position):
             return abs(game.me.pos['x'] - position[0]) + abs(game.me.pos['y'] - position[1])

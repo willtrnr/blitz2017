@@ -1,6 +1,7 @@
-import math
 import sys
 from collections import defaultdict
+
+MAXINT = 2 ** 32 - 1
 
 TAVERN = 0
 AIR = -1
@@ -129,7 +130,8 @@ class Board:
 
     def path_find_to(self, start, target, hazard_cost=None):
         """Get next direction to target"""
-        path = self.path_find(start, target, hazard_cost)
+        (s, path) = self.path_find(start, target, hazard_cost)
+        print('Path score is ', s)
         if path is None:
             return None
         if len(path) > 1:
@@ -141,11 +143,7 @@ class Board:
     def path_find(self, start, target, hazard_cost=None):
         """Get path (in reverse order) from start to target"""
         def heuristic(start, target):
-            x1 = min(start[0], target[0])
-            x2 = max(start[0], target[0])
-            y1 = min(start[1], target[1])
-            y2 = max(start[1], target[1])
-            return math.floor(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+            return abs(start[0] - target[0]) + abs(start[1] - target[1])
 
         def cost(loc):
             if hazard_cost is not None and self.hazard(loc):
@@ -164,25 +162,25 @@ class Board:
             return total_path
 
         if start is None:
-            return None
+            return (MAXINT, None)
 
         if target is None:
-            return [start]
+            return (0, [start])
 
-        closed_set = set()
-        open_set = set([start])
+        closed_set = {}
+        open_set = {start}
         came_from = dict()
 
-        g_score = defaultdict(lambda: sys.maxint)
+        g_score = defaultdict(lambda: MAXINT)
         g_score[start] = 0
 
-        f_score = defaultdict(lambda: sys.maxint)
+        f_score = defaultdict(lambda: MAXINT)
         f_score[start] = heuristic(start, target)
 
         while open_set:
             current = sorted(list(open_set), key=lambda x: f_score[x])[0]
             if current == target:
-                return reconstruct(came_from, current)
+                return (g_score[current], reconstruct(came_from, current))
 
             open_set.remove(current)
             closed_set.add(current)
@@ -190,7 +188,7 @@ class Board:
                 if neighbor != target and (neighbor in closed_set or not self.passable(neighbor)):
                     continue
 
-                tentative_g_score = g_score[current] + cost(neighbor)
+                tentative_g_score = g_score[current] + max(cost(l) for l in {neighbor} | set(self.to(neighbor, a) for a in AIM.keys()))
                 if neighbor not in open_set:
                     open_set.add(neighbor)
                 elif tentative_g_score >= g_score[neighbor]:
@@ -200,7 +198,7 @@ class Board:
                 g_score[neighbor] = tentative_g_score
                 f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, target)
 
-        return None
+        return (MAXINT, None)
 
 
 class Hero:
