@@ -163,6 +163,9 @@ class Board:
                 total_path.append(current)
             return total_path
 
+        if start is None or target is None:
+            return None
+
         closed_set = set()
         open_set = set([start])
         came_from = dict()
