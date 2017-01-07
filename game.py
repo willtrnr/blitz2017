@@ -135,7 +135,7 @@ class Board:
             return json.get('direction', None)
         except:
             print('Pathfinder as a Service failed')
-            return "None"
+            return "Stay"
 
 
 class Hero:

@@ -1,4 +1,4 @@
-from game import Game
+from game import Game, CustomerTile
 
 
 class Bot:
@@ -13,8 +13,12 @@ class Bot:
         customer = self.easiest_customer(game)
 
         if (self.sufficient_resources_for(game, customer)):
-            return self.find_customer_position(game, customer.id)
+            print('sufficient resources for customer ' + str(customer.id))
+            customer_position = self.find_customer_position(game, customer.id)
+            print('customer is at: ' + str(customer_position))
+            return customer_position
         else:
+            print('getting resources for customer ' + str(customer.id))
             return self.get_nearest_needed_resource_position(game, customer)
 
     def easiest_customer(self, game):
@@ -31,11 +35,11 @@ class Bot:
         tiles = game.board.tiles
 
         for (y, tile_row) in enumerate(tiles):
-            try:
-                x = tile_row.index("C" + str(customer_id))
-                return (x, y)
-            except:
-                pass
+            print('y' + str(y))
+            for (x, tile_column) in enumerate(tile_row):
+                if isinstance(tiles[x][y], CustomerTile):
+                    print(x)
+                    return (x, y)
 
     def sufficient_resources_for(self, game, customer):
         "Do we have sufficient resources for the passed customer?"
