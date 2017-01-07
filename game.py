@@ -167,7 +167,7 @@ class Board:
         if target is None:
             return (0, [start])
 
-        closed_set = {}
+        closed_set = set()
         open_set = {start}
         came_from = dict()
 

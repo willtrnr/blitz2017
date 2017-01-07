@@ -10,7 +10,6 @@ class Bot:
         target = self.get_target(game)
         start = (game.me.pos['x'], game.me.pos['y'])
         print(start, target, end=' ')
-        print('\n')
         return game.board.path_find_to(start=start,
                                        target=target,
                                        hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
@@ -39,13 +38,13 @@ class Bot:
 
     def assess_hazard(self, game, tile):
         """Get weight for passing through unsafe stuff"""
-        if isinstance(tile, HeroTile) and tile.id != game.me.id:
-            return 2
-        elif tile == SPIKE:
-            return 1 if game.me.life > 50 else 5
-        else:
-            return 1
-
+        # if isinstance(tile, HeroTile) and tile.id != game.me.id:
+        #     return 5 if game.me.life > 50 else 10
+        # elif tile == SPIKE:
+        #     return 5 if game.me.life > 50 else 10
+        # else:
+        #     return 1
+        return 1
 
     def easiest_customer(self, game):
         """Returns the customer that requires the less resources"""
