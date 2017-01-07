@@ -20,21 +20,21 @@ AIM = {'North': (-1, 0),
 
 class HeroTile:
     def __init__(self, id):
-        self.id = id
+        self.id = int(id)
 
 class CustomerTile:
     def __init__(self, id):
-        self.id = id
+        self.id = int(id == (-1 if id == '-' else id))
 
 
 class FriesTile:
     def __init__(self, hero_id=None):
-        self.hero_id = hero_id
+        self.hero_id = int(hero_id == (-1 if hero_id == '-' else hero_id))
 
 
 class BurgerTile:
     def __init__(self, hero_id=None):
-        self.hero_id = hero_id
+        self.hero_id = int(hero_id == (-1 if hero_id == '-' else hero_id))
 
 
 class Game:
@@ -54,17 +54,17 @@ class Game:
             for col in range(len(self.board.tiles[row])):
                 obj = self.board.tiles[row][col]
                 if isinstance(obj, FriesTile):
-                    self.fries_locs[(row, col)] = obj.hero_id
+                    self.fries_locs[(row, col)] = int(obj.hero_id ==  (-1 if obj.hero_id == '-' else obj.hero_id))
                 if isinstance(obj, BurgerTile):
-                    self.burger_locs[(row, col)] = obj.hero_id
+                    self.burger_locs[(row, col)] = int(obj.hero_id ==  (-1 if obj.hero_id == '-' else obj.hero_id))
                 elif isinstance(obj, HeroTile):
-                    self.heroes_locs[(row, col)] = obj.id
+                    self.heroes_locs[(row, col)] = int(obj.id)
                 elif obj == TAVERN:
                     self.taverns_locs.add((row, col))
                 elif obj == SPIKE:
                     self.spikes_locs.add((row, col))
                 elif isinstance(obj, CustomerTile):
-                    self.customers_locs[(row, col)] = obj.id
+                    self.customers_locs[(row, col)] = int(obj.id ==  (-1 if obj.id == '-' else obj.id))
 
 
 class Board:

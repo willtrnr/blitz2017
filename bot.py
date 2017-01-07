@@ -27,19 +27,27 @@ class Bot:
         def customer_difficulty(customer):
             return customer.french_fries + customer.burger
 
-        return sorted(game.customers, key=customer_difficulty)[0]
+        meow = sorted(game.customers, key=customer_difficulty)
+
+        return meow[0]
 
     def find_customer_position(self, game, customer_id):
         "The passed customer's position"
 
+        print('Customer to find: ' + str(customer_id))
+
         tiles = game.board.tiles
 
         for (y, tile_row) in enumerate(tiles):
-            print('y' + str(y))
             for (x, tile_column) in enumerate(tile_row):
-                if isinstance(tiles[x][y], CustomerTile):
-                    print(x)
-                    return (x, y)
+                tile = tiles[x][y]
+
+                if isinstance(tile, CustomerTile):
+                    print(type(tile.id))
+                    if tile.id == customer_id:
+                        print('tile id: ' + str(tile.id))
+                        print('customer id: ' + str(customer_id))
+                        return (x, y)
 
     def sufficient_resources_for(self, game, customer):
         "Do we have sufficient resources for the passed customer?"
