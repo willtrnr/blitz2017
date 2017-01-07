@@ -188,4 +188,4 @@ class Bot:
 
 
 def random_position(game):
-    return game.board.to((game.me.pos['x'], game.me.pos['y']), choice(AIM.keys()))
+    return game.board.to((game.me.pos['x'], game.me.pos['y']), choice(list(AIM.keys())))
