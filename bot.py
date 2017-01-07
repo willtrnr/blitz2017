@@ -24,6 +24,8 @@ class Bot:
         if (nearby_health_position):
             print('Going for nearby health')
             return nearby_health_position
+        elif (game.me.life < config.CRITICAL_LIFE):
+            return self.closest_health_location(game)
         elif (unowned_nearby_resource_position):
             print('Going for nearby resource')
             return unowned_nearby_resource_position
@@ -49,8 +51,12 @@ class Bot:
     def easiest_customer(self, game):
         """Returns the customer that requires the less resources"""
 
+        customer_positions = dict([(customer.id, self.find_customer_position(game, customer.id)) for customer in game.customers])
+
         def customer_difficulty(customer):
-            return customer.french_fries + customer.burger
+            customer_pos = customer_positions[customer.id]
+            distance = len(game.board.path_find((game.me.pos['x'], game.me.pos['y']), customer_pos)[1]) * config.STEP_COST_VS_RESOURCES
+            return customer.french_fries + customer.burger + distance
 
         customers = sorted(game.customers, key=customer_difficulty)
 
@@ -139,6 +145,12 @@ class Bot:
             return None
 
         return nearby_health_positions[0]
+
+    def closest_health_location(self, game):
+        def distance_to_me(position):
+            return abs(game.me.pos['x'] - position[0]) + abs(game.me.pos['y'] - position[1])
+
+        return sorted(game.taverns_locs, key=distance_to_me)[0]
 
 
 def random_position(game):
