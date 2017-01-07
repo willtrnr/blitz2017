@@ -6,7 +6,7 @@ class Bot:
         game = Game(state)
         target = self.get_target(game)
         start = (game.me.pos['x'], game.me.pos['y'])
-        return game.board.path_find(start, target)
+        return game.board.path_find_to(start, target)
 
     def get_target(self, game):
         "Returns the position we want to head towards"
