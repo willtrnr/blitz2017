@@ -6,12 +6,7 @@ class Bot:
         game = Game(state)
         target = self.get_target(game)
         start = (game.me.pos['x'], game.me.pos['y'])
-
-        def cockiness(tile):
-            return 1
-            # return 3 - round(game.me.life * 0.02)
-
-        return game.board.path_find_to(start, target, cockiness) or 'Stay'
+        return game.board.path_find_to(start, target) or 'Stay'
 
     def get_target(self, game):
         "Returns the position we want to head towards"

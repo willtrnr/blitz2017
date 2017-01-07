@@ -108,7 +108,7 @@ class Board:
         """True if is hazard."""
         x, y = loc
         pos = self.tiles[x][y]
-        return pos == SPIKE
+        return pos == SPIKE or isinstance(pos, HeroTile)
 
     def to(self, loc, direction):
         """Calculate a new location given the direction."""
@@ -163,8 +163,11 @@ class Board:
                 total_path.append(current)
             return total_path
 
-        if start is None or target is None:
+        if start is None:
             return None
+
+        if target is None:
+            return [start]
 
         closed_set = set()
         open_set = set([start])
