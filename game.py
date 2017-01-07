@@ -23,9 +23,10 @@ class HeroTile:
     def __init__(self, id):
         self.id = int(id)
 
+
 class CustomerTile:
     def __init__(self, id):
-        self.id = int(id == (-1 if id == '-' else id))
+        self.id = int(id)
 
 
 class FriesTile:
@@ -55,9 +56,9 @@ class Game:
             for col in range(len(self.board.tiles[row])):
                 obj = self.board.tiles[row][col]
                 if isinstance(obj, FriesTile):
-                    self.fries_locs[(row, col)] = int(obj.hero_id ==  (-1 if obj.hero_id == '-' else obj.hero_id))
+                    self.fries_locs[(row, col)] = int(obj.hero_id)
                 if isinstance(obj, BurgerTile):
-                    self.burger_locs[(row, col)] = int(obj.hero_id ==  (-1 if obj.hero_id == '-' else obj.hero_id))
+                    self.burger_locs[(row, col)] = int(obj.hero_id)
                 elif isinstance(obj, HeroTile):
                     self.heroes_locs[(row, col)] = int(obj.id)
                 elif obj == TAVERN:
@@ -108,7 +109,6 @@ class Board:
         x, y = loc
         pos = self.tiles[x][y]
         return pos == SPIKE
-
 
     def to(self, loc, direction):
         """Calculate a new location given the direction."""
@@ -204,6 +204,7 @@ class Hero:
     def __init__(self, hero):
         self.name = hero['name']
         self.pos = hero['pos']
+        self.id = int(hero['id'])
         self.life = hero['life']
         self.calories = hero['calories']
         self.french_fries = hero['frenchFriesCount']

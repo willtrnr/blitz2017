@@ -6,7 +6,7 @@ class Bot:
         game = Game(state)
         target = self.get_target(game)
         start = (game.me.pos['x'], game.me.pos['y'])
-        return game.board.path_find_to(start, target)
+        return game.board.path_find_to(start, target) or 'Stay'
 
     def get_target(self, game):
         "Returns the position we want to head towards"
@@ -43,16 +43,14 @@ class Bot:
                 tile = tiles[x][y]
 
                 if isinstance(tile, CustomerTile):
-                    print(type(tile.id))
                     if tile.id == customer_id:
-                        print('tile id: ' + str(tile.id))
-                        print('customer id: ' + str(customer_id))
                         return (x, y)
 
     def sufficient_resources_for(self, game, customer):
         "Do we have sufficient resources for the passed customer?"
 
-        return game.me.french_fries >= customer.french_fries and game.me.burger >= customer.burger
+        return (game.me.french_fries >= customer.french_fries
+                and game.me.burger >= customer.burger)
 
     def get_nearest_needed_resource_position(self, game, customer):
         "The position of the closest resource necessary for the customer"
@@ -61,10 +59,13 @@ class Bot:
             return abs(game.me.pos['x'] - position[0]) + abs(game.me.pos['y'] - position[1])
 
         if game.me.french_fries < customer.french_fries:
-            target_position = sorted(game.fries_locs.keys(), key=distance_to_me)[0]
+            pos_of_fries_we_dont_have = [pos for (pos, hero_id) in game.fries_locs.items() if hero_id != game.me.id]
+            target_position = sorted(pos_of_fries_we_dont_have, key=distance_to_me)[0]
+            # TODO: manage this being empty if we own everything
             print('we need fries! the closest is: ' + str(target_position))
         else:
-            target_position = sorted(game.burger_locs.keys(), key=distance_to_me)[0]
+            pos_of_burgers_we_dont_have = [pos for (pos, hero_id) in game.burger_locs.items() if hero_id != game.me.id]
+            target_position = sorted(pos_of_burgers_we_dont_have, key=distance_to_me)[0]
             print('we need burgers! the closest is: ' + str(target_position))
 
         return target_position
