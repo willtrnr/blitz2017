@@ -16,7 +16,7 @@ class Bot:
                                            hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
         except Exception as e:
             print(e)
-            return 'Stay'
+            return choice(['Stay'] + list(AIM.keys()))
 
     def get_target(self, game):
         """Returns the position we want to head towards"""
