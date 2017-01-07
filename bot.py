@@ -8,7 +8,8 @@ class Bot:
         start = (game.me.pos['x'], game.me.pos['y'])
 
         def cockiness(tile):
-            return 6 - round(game.me.life * 0.05)
+            return 1
+            # return 3 - round(game.me.life * 0.02)
 
         return game.board.path_find_to(start, target, cockiness) or 'Stay'
 
