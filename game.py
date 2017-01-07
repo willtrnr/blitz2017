@@ -1,5 +1,6 @@
-import re
-import requests
+import math
+import sys
+from collections import defaultdict
 
 TAVERN = 0
 AIR = -1
@@ -77,18 +78,14 @@ class Board:
             return TAVERN
         if tile_string == '^^':
             return SPIKE
-        match = re.match(r'F([-0-9])', tile_string)
-        if match:
-            return FriesTile(match.group(1))
-        match = re.match(r'B([-0-9])', tile_string)
-        if match:
-            return BurgerTile(match.group(1))
-        match = re.match(r'@([0-9])', tile_string)
-        if match:
-            return HeroTile(match.group(1))
-        match = re.match(r'C([0-9])', tile_string)
-        if match:
-            return CustomerTile(match.group(1))
+        if tile_string[0] == 'F':
+            return FriesTile(tile_string[1])
+        if tile_string[0] == 'B':
+            return BurgerTile(tile_string[1])
+        if tile_string[0] == '@':
+            return HeroTile(tile_string[1])
+        if tile_string[0] == 'C':
+            return CustomerTile(tile_string[1])
 
     def __parseTiles(self, tiles):
         vector = [tiles[i:i+2] for i in range(0, len(tiles), 2)]
@@ -97,7 +94,6 @@ class Board:
         return [[self.__parseTile(x) for x in xs] for xs in matrix]
 
     def __init__(self, board):
-        self._raw = board['tiles']
         self.size = board['size']
         self.tiles = self.__parseTiles(board['tiles'])
 
@@ -105,7 +101,14 @@ class Board:
         """True if can walk through."""
         x, y = loc
         pos = self.tiles[x][y]
-        return (pos != WALL) and (pos != TAVERN) and (pos != CUSTOMER) and not isinstance(pos, FriesTile) and not isinstance(pos, BurgerTile)
+        return (pos != WALL) and (pos != TAVERN) and not isinstance(pos, CustomerTile) and not isinstance(pos, FriesTile) and not isinstance(pos, BurgerTile) and not isinstance(pos, HeroTile)
+
+    def hazard(self, loc):
+        """True if is hazard."""
+        x, y = loc
+        pos = self.tiles[x][y]
+        return pos == SPIKE
+
 
     def to(self, loc, direction):
         """Calculate a new location given the direction."""
@@ -124,18 +127,74 @@ class Board:
 
         return (n_row, n_col)
 
-    def path_find(self, start, target):
-        try:
-            r = requests.get('http://game.blitz.codes:8081/pathfinding/direction',
-                             params={'map': self._raw,
-                                     'size': self.size,
-                                     'start': '(%d,%d)' % start,
-                                     'target': '(%d,%d)' % target})
-            json = r.json()
-            return json.get('direction', None)
-        except:
-            print('Pathfinder as a Service failed')
-            return "Stay"
+    def path_find_to(self, start, target, hazard_cost=None):
+        """Get next direction to target"""
+        path = self.path_find(start, target, hazard_cost)
+        if path is None:
+            return None
+        if len(path) > 1:
+            n = (path[-2][0] - start[0], path[-2][1] - start[1])
+            return next(a for (a, d) in AIM.items() if d == n)
+        else:
+            return 'Stay'
+
+    def path_find(self, start, target, hazard_cost=None):
+        """Get path (in reverse order) from start to target"""
+        def heuristic(start, target):
+            x1 = min(start[0], target[0])
+            x2 = max(start[0], target[0])
+            y1 = min(start[1], target[1])
+            y2 = max(start[1], target[1])
+            return math.floor(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))
+
+        def cost(loc):
+            if hazard_cost is not None and self.hazard(loc):
+                if callable(hazard_cost):
+                    return hazard_cost(self.tiles[loc[0]][loc[1]])
+                else:
+                    return int(hazard_cost)
+            else:
+                return 1
+
+        def reconstruct(came_from, current):
+            total_path = [current]
+            while current in came_from:
+                current = came_from[current]
+                total_path.append(current)
+            return total_path
+
+        closed_set = set()
+        open_set = set([start])
+        came_from = dict()
+
+        g_score = defaultdict(lambda: sys.maxint)
+        g_score[start] = 0
+
+        f_score = defaultdict(lambda: sys.maxint)
+        f_score[start] = heuristic(start, target)
+
+        while open_set:
+            current = sorted(list(open_set), key=lambda x: f_score[x])[0]
+            if current == target:
+                return reconstruct(came_from, current)
+
+            open_set.remove(current)
+            closed_set.add(current)
+            for neighbor in ((current[0] + x, current[1] + y) for x, y in AIM.values()):
+                if neighbor != target and (neighbor in closed_set or not self.passable(neighbor)):
+                    continue
+
+                tentative_g_score = g_score[current] + cost(neighbor)
+                if neighbor not in open_set:
+                    open_set.add(neighbor)
+                elif tentative_g_score >= g_score[neighbor]:
+                    continue
+
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = g_score[neighbor] + heuristic(neighbor, target)
+
+        return None
 
 
 class Hero:
