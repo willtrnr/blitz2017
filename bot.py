@@ -8,9 +8,9 @@ class Bot:
         try:
             print('\n')
             game = Game(state)
-            target = self.get_target(game)
             start = (game.me.pos['x'], game.me.pos['y'])
-            print(start, target, end=' ')
+            target = self.get_target(game)
+            print('From', start, 'to', target, end=' ')
             return game.board.path_find_to(start=start,
                                            target=target,
                                            hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
@@ -25,29 +25,35 @@ class Bot:
         unowned_nearby_resource_position = self.unowned_nearby_resource_position(game)
         nearby_health_position = self.nearby_health_position(game)
 
-        if (nearby_health_position):
+        if nearby_health_position:
             print('Going for nearby health')
             return nearby_health_position
-        elif (game.me.life < config.CRITICAL_LIFE):
-            return self.closest_health_location(game)
-        elif (unowned_nearby_resource_position):
+        elif game.me.life < config.CRITICAL_LIFE:
+            health_position = self.closest_health_location(game)
+            print('Going for health at', health_position)
+            return health_position
+        elif unowned_nearby_resource_position:
             print('Going for nearby resource')
             return unowned_nearby_resource_position
-        elif (self.sufficient_resources_for(game, customer)):
-            print('sufficient resources for customer ' + str(customer.id))
+        elif self.sufficient_resources_for(game, customer):
+            print('Sufficient resources for customer', customer.id)
             customer_position = self.find_customer_position(game, customer.id)
-            print('customer is at: ' + str(customer_position))
+            print('Customer is at:', customer_position)
             return customer_position
         else:
-            print('getting resources for customer ' + str(customer.id))
+            print('Getting resources for customer ' + str(customer.id))
             return self.get_nearest_needed_resource_position(game, customer)
 
     def assess_hazard(self, game, tile):
         """Get weight for passing through unsafe stuff"""
-        # if isinstance(tile, HeroTile) and tile.id != game.me.id:
-        #     return int(game.board.size / 2) if game.me.life > 50 else game.board.size
-        # elif tile == SPIKE:
-        #     return int(game.board.size / 2) if game.me.life > 50 else game.board.size
+        if isinstance(tile, HeroTile) and tile.id != game.me.id:
+            enemy = next(h for h in game.heroes if h.id == tile.id)
+            if enemy.life < game.me.life and game.me.life > config.CRITICAL_LIFE:
+                return 1
+            else:
+                return int(config.HAZARD_FACTOR * 100) - int(config.HAZARD_FACTOR * game.me.life) + 1
+        elif tile == SPIKE:
+            return int(config.HAZARD_FACTOR * 100) - int(config.HAZARD_FACTOR * game.me.life) + 1
         return 1
 
     def easiest_customer(self, game):
@@ -96,13 +102,13 @@ class Bot:
             if len(pos_of_fries_we_dont_have) == 0:
                 return random_position(game)
             target_position = sorted(pos_of_fries_we_dont_have, key=distance_to_me)[0]
-            print('we need fries! the closest is: ' + str(target_position))
+            print('We need fries! the closest is:', target_position)
         else:
             pos_of_burgers_we_dont_have = [pos for (pos, hero_id) in game.burger_locs.items() if hero_id != game.me.id]
             if len(pos_of_burgers_we_dont_have) == 0:
                 return random_position(game)
             target_position = sorted(pos_of_burgers_we_dont_have, key=distance_to_me)[0]
-            print('we need burgers! the closest is: ' + str(target_position))
+            print('We need burgers! the closest is:', target_position)
 
         return target_position
 
