@@ -117,13 +117,13 @@ class Board:
         n_row = row + d_row
         if n_row < 0:
             n_row = 0
-        if n_row > self.size:
-            n_row = self.size
+        if n_row >= self.size:
+            n_row = self.size - 1
         n_col = col + d_col
         if n_col < 0:
             n_col = 0
-        if n_col > self.size:
-            n_col = self.size
+        if n_col >= self.size:
+            n_col = self.size - 1
 
         return (n_row, n_col)
 
