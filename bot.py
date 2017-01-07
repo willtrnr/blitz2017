@@ -5,14 +5,18 @@ from game import Game, CustomerTile, BurgerTile, FriesTile, HeroTile, SPIKE, AIM
 
 class Bot:
     def move(self, state):
-        print('\n')
-        game = Game(state)
-        target = self.get_target(game)
-        start = (game.me.pos['x'], game.me.pos['y'])
-        print(start, target, end=' ')
-        return game.board.path_find_to(start=start,
-                                       target=target,
-                                       hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
+        try:
+            print('\n')
+            game = Game(state)
+            target = self.get_target(game)
+            start = (game.me.pos['x'], game.me.pos['y'])
+            print(start, target, end=' ')
+            return game.board.path_find_to(start=start,
+                                           target=target,
+                                           hazard_cost=lambda t: self.assess_hazard(game, t)) or 'Stay'
+        except Exception as e:
+            print(e)
+            return 'Stay'
 
     def get_target(self, game):
         """Returns the position we want to head towards"""
