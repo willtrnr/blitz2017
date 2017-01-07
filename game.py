@@ -183,7 +183,7 @@ class Board:
 
             open_set.remove(current)
             closed_set.add(current)
-            for neighbor in ((current[0] + x, current[1] + y) for x, y in AIM.values()):
+            for neighbor in (self.to(current, a) for a in AIM.keys()):
                 if neighbor != target and (neighbor in closed_set or not self.passable(neighbor)):
                     continue
 
