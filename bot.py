@@ -13,11 +13,6 @@ class Bot:
             game = Game(state)
             start = (game.me.pos['x'], game.me.pos['y'])
             target = self.get_target(game)
-            if (self.history.count(target) > 2):
-                print('OMG STUCK')
-                target = random_position(game)
-
-            self.add_to_history(start, target)
             print('From', start, 'to', target, end=' ')
             return game.board.path_find_to(start=start,
                                            target=target,
