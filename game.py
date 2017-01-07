@@ -1,4 +1,5 @@
 import re
+import requests
 
 TAVERN = 0
 AIR = -1
@@ -91,6 +92,7 @@ class Board:
         return [[self.__parseTile(x) for x in xs] for xs in matrix]
 
     def __init__(self, board):
+        self._raw = board['tiles']
         self.size = board['size']
         self.tiles = self.__parseTiles(board['tiles'])
 
@@ -116,6 +118,19 @@ class Board:
             n_col = self.size
 
         return (n_row, n_col)
+
+    def path_find(self, start, target):
+        try:
+            r = requests.get('http://game.blitz.codes:8081/pathfinding/direction',
+                             params={'map': self._raw,
+                                     'size': self.size,
+                                     'start': '(%d,%d)' % start,
+                                     'target': '(%d,%d)' % target})
+            json = r.json()
+            return json.get('direction', None)
+        except e:
+            print('Pathfinder as a Service failed')
+            return None
 
 
 class Hero:
